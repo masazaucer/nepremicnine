@@ -1,6 +1,7 @@
 import os
 import requests
 import re
+import csv
 
 
 nepremicnine_frontpage_url = 'https://www.nepremicnine.net/oglasi-prodaja/ljubljana-mesto/stanovanje/'
@@ -50,7 +51,7 @@ def get_dict_from_ad_block(block):
     '<span class="title">(?P<naslov>.*?)</span></a></h2>.*' +
     'Leto: <strong>(?P<leto>.*?)</strong>.*' +
     'itemprop="description">(?P<opis>.*?)</div>.*' +
-    '<span class="velikost" lang="sl">(?P<velikost>.*?)</span>.*' +
+    '(<span class="velikost" lang="sl">(?P<velikost>.*?)</span>)?.*' +
     '<span class="agencija">(?P<agencija>.*?)</span>.*' +
     'itemprop="price" content="(?P<cena>.*?)" />')
     regexp = re.compile(pattern, re.DOTALL)
@@ -68,6 +69,17 @@ def ads_from_file(directory, filename):
     seznam_slovarjev = [get_dict_from_ad_block(oglas) for oglas in oglasi]
     return seznam_slovarjev
 
+def write_csv(polja, vrstice, directory, filename):
+    os.makedirs(directory, exist_ok=True)
+    pot = os.path.join(directory, filename)
+
+    with open(pot, 'w', encoding='utf-8') as dat:
+        writer = csv.DictWriter(dat, fieldnames=polja)
+        writer.writeheader()
+        for vrstica in vrstice:
+            if vrstica != None:
+                writer.writerow(vrstica)
+    return
 
 def main():
     #Pridobi vsebino strani, jo razdeli na posamezne oglase, prebere ustrezne podatke in jih vrne kot seznam slovarjev.
@@ -76,6 +88,8 @@ def main():
 
     podatki = ads_from_file(nepremicnine_directory, frontpage_filename)
     print(podatki)
+
+    write_csv(['id', 'regija', 'naslov', 'leto', 'opis', 'velikost', 'agencija', 'cena'], podatki, nepremicnine_directory, csv_filename)
 
 
 
