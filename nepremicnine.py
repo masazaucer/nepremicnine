@@ -48,7 +48,9 @@ def get_dict_from_ad_block(block):
     pattern = (r'id="(?P<id>\w{8})".*' +
     #r'(oglasi prodaja > (?P<regija>.*?) > stanovanje" />)?.*' +
     r'<span class="title">(?P<naslov>.*?)</span></a></h2>.*' +
+    r'<span class="tipi">(?P<tip>.*?)</span></span>.*' +
     r'Leto: <strong>(?P<leto>.*?)</strong>.*' +
+    r'<span class="atribut">Zemljišče: <strong>(?P<zemljisce>.*?) m2</strong></span>.*' +
     r'itemprop="description">(?P<opis>.*?)</div>.*' +
     r'<span class="velikost" lang="sl">(?P<velikost>.*?) m2</span>.*' +
     r'<span class="agencija">(?P<agencija>.*?)</span>.*' +
@@ -92,10 +94,33 @@ def zberi_oglase():
                 if oglas != None:
                     oglas['regija'] = regija
                     print(oglas)
-                    oglasi.append(oglas)
+                    podatki_oglasa = izloci_podatke(oglas)
+                    oglasi.append(podatki_oglasa)
     return oglasi
 
+def izloci_podatke(oglas):
+    if oglas:
+        oglas['id'] = oglas['id'].lstrip('o')
+        oglas['regija'] = oglas['regija'].replace('-', ' ')
+        oglas['naslov'] = oglas['naslov']
 
+        try:
+            oglas['tip'] = float(oglas['tip'].rstrip('-sobno').replace(',', '.'))
+        except ValueError:
+            if oglas['tip'] == '5 in večsobno':
+                oglas['tip'] = 5
+            elif oglas['tip'] == 'Garsonjera':
+                oglas['tip'] = 0
+            else:
+                oglas['tip'] = None
+
+        oglas['leto'] = int(oglas['leto'])
+        oglas['zemljisce'] = float(oglas['zemljisce'])
+        oglas['opis'] = oglas['opis']
+        oglas['velikost'] = float(oglas['velikost'].replace(',', '.'))
+        oglas['agencija'] = oglas['agencija']
+        oglas['cena'] = float(oglas['cena'])
+    return oglas
 
 def main():
     #Pridobi vsebino strani, jo razdeli na posamezne oglase, prebere ustrezne podatke in jih shrani v csv.
@@ -105,7 +130,7 @@ def main():
     podatki = zberi_oglase()
     print(podatki)
 
-    write_csv(['id', 'regija', 'naslov', 'leto', 'opis', 'velikost', 'agencija', 'cena'], podatki, nepremicnine_directory, csv_filename)
+    write_csv(['id', 'regija', 'naslov', 'tip', 'leto', 'zemljisce', 'opis', 'velikost', 'agencija', 'cena'], podatki, nepremicnine_directory, csv_filename)
 
 
 
