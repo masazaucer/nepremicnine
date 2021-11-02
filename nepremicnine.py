@@ -1,5 +1,4 @@
 import os
-import requests
 import re
 import csv
 from zajemi import *
@@ -9,6 +8,18 @@ poberi = False
 nepremicnine_directory = 'podatki_nepremicnine'
 
 csv_filename = 'nepremicnine.csv'
+
+vzorec_za_oglas = r'<div class="oglas_container.*?<span>O ponudniku</span></a>'
+
+vzorec_za_podatke = (r'id="o(?P<id>\d{7})".*?' +
+    r'(<span class="title">(?P<naslov>.*?)</span></a></h2>.*?)?' +
+    r'(<span class="tipi">(?P<tip>.*?)</span></span>.*?)?' +
+    r'(Leto: <strong>(?P<leto>.*?)</strong>.*?)?' +
+    r'(<span class="atribut">Zemljišče: <strong>(?P<zemljisce>.*?) m2</strong></span>.*?)?' +
+    r'(itemprop="description">(?P<opis>.*?)</div>.*?)?' +
+    r'(<span class="velikost" lang="sl">(?P<velikost>.*?) m2</span>.*?)?' +
+    r'(<span class="agencija">(?P<agencija>.*?)</span>.*?)?' +
+    r'itemprop="price" content="(?P<cena>.*?)" />')
 
 """
 def download_url_to_string(url):
@@ -38,24 +49,13 @@ def read_file_to_string(directory, filename):
 
 def page_to_ads(page_content):
     #Niz z vsebino strani razbije na bloke za posamezne oglase
-    pattern = r'<div class="oglas_container.*?<span>O ponudniku</span></a>'
-    regexp = re.compile(pattern, re.DOTALL)
+    regexp = re.compile(vzorec_za_oglas, re.DOTALL)
 
     return re.findall(regexp, page_content)
 
 def get_dict_from_ad_block(block):
     #Iz niza za posamezen oglas prebere ustrezne podatke ustrezne podatke.
-    pattern = (r'id="(?P<id>\w{8})".*' +
-    #r'(oglasi prodaja > (?P<regija>.*?) > stanovanje" />)?.*' +
-    r'<span class="title">(?P<naslov>.*?)</span></a></h2>.*' +
-    r'<span class="tipi">(?P<tip>.*?)</span></span>.*' +
-    r'Leto: <strong>(?P<leto>.*?)</strong>.*' +
-    r'<span class="atribut">Zemljišče: <strong>(?P<zemljisce>.*?) m2</strong></span>.*' +
-    r'itemprop="description">(?P<opis>.*?)</div>.*' +
-    r'<span class="velikost" lang="sl">(?P<velikost>.*?) m2</span>.*' +
-    r'<span class="agencija">(?P<agencija>.*?)</span>.*' +
-    r'itemprop="price" content="(?P<cena>.*?)" />')
-    regexp = re.compile(pattern, re.DOTALL)
+    regexp = re.compile(vzorec_za_podatke, re.DOTALL)
     najdeno = re.search(regexp, block)
     if najdeno:
         return najdeno.groupdict()
@@ -68,7 +68,6 @@ def ads_from_file(directory, filename):
     vsebina = read_file_to_string(directory, filename)
     oglasi = page_to_ads(vsebina)
     seznam_slovarjev = [get_dict_from_ad_block(oglas) for oglas in oglasi]
-    print(seznam_slovarjev)
     return seznam_slovarjev
 
 def write_csv(polja, vrstice, directory, filename):
@@ -93,14 +92,13 @@ def zberi_oglase():
             for oglas in podatki:
                 if oglas != None:
                     oglas['regija'] = regija
-                    print(oglas)
                     podatki_oglasa = izloci_podatke(oglas)
                     oglasi.append(podatki_oglasa)
     return oglasi
 
 def izloci_podatke(oglas):
     if oglas:
-        oglas['id'] = oglas['id'].lstrip('o')
+        oglas['id'] = oglas['id']
         oglas['regija'] = oglas['regija'].replace('-', ' ')
         oglas['naslov'] = oglas['naslov']
 
@@ -114,12 +112,12 @@ def izloci_podatke(oglas):
             else:
                 oglas['tip'] = None
 
-        oglas['leto'] = int(oglas['leto'])
-        oglas['zemljisce'] = float(oglas['zemljisce'])
+        oglas['leto'] = (int(oglas['leto']) if oglas['leto'] else None)
+        oglas['zemljisce'] = (float(oglas['zemljisce']) if oglas['zemljisce'] else 0)
         oglas['opis'] = oglas['opis']
-        oglas['velikost'] = float(oglas['velikost'].replace(',', '.'))
+        oglas['velikost'] = (float(oglas['velikost'].replace(',', '.')) if oglas['velikost'] else None)
         oglas['agencija'] = oglas['agencija']
-        oglas['cena'] = float(oglas['cena'])
+        oglas['cena'] = (float(oglas['cena'])if oglas['cena'] else None)
     return oglas
 
 def main():
@@ -128,7 +126,6 @@ def main():
         poberi_strani()
 
     podatki = zberi_oglase()
-    print(podatki)
 
     write_csv(['id', 'regija', 'naslov', 'tip', 'leto', 'zemljisce', 'opis', 'velikost', 'agencija', 'cena'], podatki, nepremicnine_directory, csv_filename)
 
