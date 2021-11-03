@@ -85,7 +85,7 @@ def write_csv(polja, vrstice, directory, filename):
 def zberi_oglase():
     oglasi = []
     for regija in REGIJE:
-        for stran in range(1, STEVILO_STRANI + 1):
+        for stran in range(1, STEVILA_STRANI_ZA_REGIJE[regija] + 1):
             datoteka = f'nepremicnine-{regija}-{stran}.html'
             print(datoteka)
             podatki = ads_from_file(nepremicnine_directory, datoteka)
@@ -114,7 +114,7 @@ def izloci_podatke(oglas):
         oglas['leto'] = (int(oglas['leto']) if oglas['leto'] else None)
         oglas['zemljisce'] = (float(oglas['zemljisce']) if oglas['zemljisce'] else 0)
         oglas['opis'] = str(oglas['opis'].strip())
-        oglas['velikost'] = (float(oglas['velikost'].replace(',', '.')) if oglas['velikost'] else None)
+        oglas['velikost'] = (float(oglas['velikost'].replace('.','').replace(',', '.')) if oglas['velikost'] else None)
         oglas['agencija'] = str(oglas['agencija'].strip())
         oglas['cena'] = (float(oglas['cena'])if oglas['cena'] else None)
 
