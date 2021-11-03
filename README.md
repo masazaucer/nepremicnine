@@ -7,8 +7,8 @@ Za vsako stanovanje sem zajela:
 * id oglasa
 * naslov oglasa
 * regijo, v kateri se stanovanje nahaja (označeno s številkami)
-* velikost stanovanja (v m<sup>2<\sup>)
-* velikost zemljišča (v m<sup>2<\sup>)
+* velikost stanovanja (v m<sup>2)
+* velikost zemljišča (v m<sup>2)
 * tip stanovanja(koliko sobno stanovanje je, pri čemer 0 pomeni garsonjera)
 * leto izgradnje
 * morebitno leto obnove
