@@ -9,9 +9,9 @@ nepremicnine_directory = 'podatki_nepremicnine'
 
 csv_filename = 'nepremicnine.csv'
 
-vzorec_za_oglas = r'<div class="oglas_container.*?<span>O ponudniku</span></a>'
+vzorec_za_oglas = re.compile(r'<div class="oglas_container.*?<span>O ponudniku</span></a>', re.DOTALL)
 
-vzorec_za_podatke = (r'id="o(?P<id>\d{7})".*?' +
+vzorec_za_podatke = re.compile((r'id="o(?P<id>\d{7})".*?' +
     r'(<span class="title">(?P<naslov>.*?)</span></a></h2>.*?)?' +
     r'(<span class="tipi">(?P<tip>.*?)</span></span>.*?)?' +
     r'(Leto: <strong>(?P<leto>.*?)</strong>.*?)?' +
@@ -19,7 +19,9 @@ vzorec_za_podatke = (r'id="o(?P<id>\d{7})".*?' +
     r'(itemprop="description">(?P<opis>.*?)</div>.*?)?' +
     r'(<span class="velikost" lang="sl">(?P<velikost>.*?) m2</span>.*?)?' +
     r'(<span class="agencija">(?P<agencija>.*?)</span>.*?)?' +
-    r'itemprop="price" content="(?P<cena>.*?)" />')
+    r'itemprop="price" content="(?P<cena>.*?)" />'), re.DOTALL)
+
+vzorec_za_obnovo = re.compile(r'adaptirano l. (?P<obnova>.*?),', re.DOTALL)
 
 """
 def download_url_to_string(url):
@@ -49,14 +51,11 @@ def read_file_to_string(directory, filename):
 
 def page_to_ads(page_content):
     #Niz z vsebino strani razbije na bloke za posamezne oglase
-    regexp = re.compile(vzorec_za_oglas, re.DOTALL)
-
-    return re.findall(regexp, page_content)
+    return re.findall(vzorec_za_oglas, page_content)
 
 def get_dict_from_ad_block(block):
     #Iz niza za posamezen oglas prebere ustrezne podatke ustrezne podatke.
-    regexp = re.compile(vzorec_za_podatke, re.DOTALL)
-    najdeno = re.search(regexp, block)
+    najdeno = re.search(vzorec_za_podatke, block)
     if najdeno:
         return najdeno.groupdict()
     else:
@@ -88,7 +87,6 @@ def zberi_oglase():
             datoteka = f'nepremicnine-{regija}-{stran}.html'
             print(datoteka)
             podatki = ads_from_file(nepremicnine_directory, datoteka)
-            print(podatki)
             for oglas in podatki:
                 if oglas != None:
                     oglas['regija'] = regija
@@ -118,6 +116,12 @@ def izloci_podatke(oglas):
         oglas['velikost'] = (float(oglas['velikost'].replace(',', '.')) if oglas['velikost'] else None)
         oglas['agencija'] = oglas['agencija']
         oglas['cena'] = (float(oglas['cena'])if oglas['cena'] else None)
+        obnova = vzorec_za_obnovo.search(oglas['opis'])
+        if obnova:
+            obnova = obnova.groupdict()
+            oglas['obnova'] = int(obnova['obnova'])
+        else:
+            oglas['obnova'] = None
     return oglas
 
 def main():
@@ -127,7 +131,7 @@ def main():
 
     podatki = zberi_oglase()
 
-    write_csv(['id', 'regija', 'naslov', 'tip', 'leto', 'zemljisce', 'opis', 'velikost', 'agencija', 'cena'], podatki, nepremicnine_directory, csv_filename)
+    write_csv(['id', 'regija', 'naslov', 'tip', 'leto', 'obnova', 'zemljisce', 'opis', 'velikost', 'agencija', 'cena'], podatki, nepremicnine_directory, csv_filename)
 
 
 
