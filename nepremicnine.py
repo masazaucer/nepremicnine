@@ -9,6 +9,8 @@ nepremicnine_directory = 'podatki_nepremicnine'
 
 csv_filename = 'nepremicnine.csv'
 
+csv_regije = 'regije.csv'
+
 vzorec_za_oglas = re.compile(r'<div class="oglas_container.*?<span>O ponudniku</span></a>', re.DOTALL)
 
 vzorec_za_podatke = re.compile((r'id="o(?P<id>\d{7})".*?' +
@@ -97,8 +99,7 @@ def zberi_oglase():
 def izloci_podatke(oglas):
     if oglas:
         oglas['id'] = oglas['id']
-        oglas['regija'] = oglas['regija'].replace('-', ' ')
-        oglas['naslov'] = oglas['naslov']
+        oglas['naslov'] = str(oglas['naslov'].strip())
 
         try:
             oglas['tip'] = float(oglas['tip'].rstrip('-sobno').replace(',', '.'))
@@ -112,10 +113,13 @@ def izloci_podatke(oglas):
 
         oglas['leto'] = (int(oglas['leto']) if oglas['leto'] else None)
         oglas['zemljisce'] = (float(oglas['zemljisce']) if oglas['zemljisce'] else 0)
-        oglas['opis'] = oglas['opis']
+        oglas['opis'] = str(oglas['opis'].strip())
         oglas['velikost'] = (float(oglas['velikost'].replace(',', '.')) if oglas['velikost'] else None)
-        oglas['agencija'] = oglas['agencija']
+        oglas['agencija'] = str(oglas['agencija'].strip())
         oglas['cena'] = (float(oglas['cena'])if oglas['cena'] else None)
+
+        oglas['regija'] = REGIJE[oglas['regija']]
+
         obnova = vzorec_za_obnovo.search(oglas['opis'])
         if obnova:
             obnova = obnova.groupdict()
@@ -124,6 +128,13 @@ def izloci_podatke(oglas):
             oglas['obnova'] = None
     return oglas
 
+def regije_csv():
+    regije = [{'indeks': indeks, 'regija': regija} for regija, indeks in REGIJE.items()]
+    print(regije)
+    write_csv(['indeks', 'regija'], regije, nepremicnine_directory, csv_regije)
+    return regije
+
+
 def main():
     #Pridobi vsebino strani, jo razdeli na posamezne oglase, prebere ustrezne podatke in jih shrani v csv.
     if poberi:
@@ -131,9 +142,8 @@ def main():
 
     podatki = zberi_oglase()
 
-    write_csv(['id', 'regija', 'naslov', 'tip', 'leto', 'obnova', 'zemljisce', 'opis', 'velikost', 'agencija', 'cena'], podatki, nepremicnine_directory, csv_filename)
+    write_csv(['id', 'naslov', 'regija', 'velikost', 'zemljisce', 'tip', 'leto', 'obnova', 'opis', 'agencija', 'cena'], podatki, nepremicnine_directory, csv_filename)
 
-
-
+    regije_csv()
 
 main()
