@@ -1,7 +1,7 @@
 import requests
 import re
 
-REGIJE = {'severna-primorska': 1, 'gorenjska' : 2, 'juzna-primorska' : 3, 'notranjska' : 4, 'ljubljana-okolica' : 5, 'ljubljana-mesto' : 6, 'dolenjska' : 7, 'posavska' : 8, 'zasavska' : 9, 'savinjska' : 10, 'koroška' : 11, 'podravska' : 12, 'pomurska' : 13}
+REGIJE = {'severna-primorska': 1, 'gorenjska' : 2, 'juzna-primorska' : 3, 'notranjska' : 4, 'ljubljana-okolica' : 5, 'ljubljana-mesto' : 6, 'dolenjska' : 7, 'posavska' : 8, 'zasavska' : 9, 'savinjska' : 10, 'koroska' : 11, 'podravska' : 12, 'pomurska' : 13}
 STEVILA_STRANI_ZA_REGIJE = {}
 vzorec_za_strani = re.compile(r'<ul data-pages="(?P<strani>\d+?)">', re.DOTALL)
 

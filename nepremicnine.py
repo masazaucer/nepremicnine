@@ -3,7 +3,7 @@ import re
 import csv
 from zajemi import *
 
-poberi = False
+poberi = True
 
 nepremicnine_directory = 'podatki_nepremicnine'
 
@@ -112,14 +112,16 @@ def izloci_podatke(oglas):
                 oglas['tip'] = None
 
         oglas['leto'] = (int(oglas['leto']) if oglas['leto'] else None)
-        oglas['zemljisce'] = (float(oglas['zemljisce']) if oglas['zemljisce'] else 0)
+        oglas['zemljisce'] = (float(oglas['zemljisce']) if oglas['zemljisce'] else None)
         oglas['opis'] = str(oglas['opis'].strip())
         oglas['velikost'] = (float(oglas['velikost'].replace('.','').replace(',', '.')) if oglas['velikost'] else None)
         oglas['agencija'] = str(oglas['agencija'].strip())
         oglas['cena'] = (float(oglas['cena'])if oglas['cena'] else None)
+        if oglas['cena']  and oglas['cena']> 10**8:
+            oglas['cena'] = None
 
         oglas['regija'] = REGIJE[oglas['regija']]
-
+        
         obnova = vzorec_za_obnovo.search(oglas['opis'])
         if obnova:
             obnova = obnova.groupdict()
@@ -130,7 +132,6 @@ def izloci_podatke(oglas):
 
 def regije_csv():
     regije = [{'indeks': indeks, 'regija': regija} for regija, indeks in REGIJE.items()]
-    print(regije)
     write_csv(['indeks', 'regija'], regije, nepremicnine_directory, csv_regije)
     return regije
 
