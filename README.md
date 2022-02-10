@@ -24,3 +24,7 @@ Ukvarjala se bom z naslednjimi vprašanji:
 * Ali so manjša stanovanja dražja glede na kvadratni meter?
 * Koliko zemljišče pripomore k višji ceni stanovanja?
 * Katera lastnost stanovanj najbolj vpliva na njihovo ceno?
+
+Poganjanje datotek:
+* S pogonom datoteke nepremicnine.py podatke spravimo v datoteko csv. Pri tem s parametrom poberi uravnavamo, ali podatke prebere iz spletne strani ali le iz ze ustvarjenih datotek (ce je nastavljen na true podatke prebere s spletne strani).
+* V datoteki nepremicnine.ipynb se nahaja analiza podatkov iz datoteke nepremicnine.csv.
