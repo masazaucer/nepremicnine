@@ -56,7 +56,7 @@ def page_to_ads(page_content):
     return re.findall(vzorec_za_oglas, page_content)
 
 def get_dict_from_ad_block(block):
-    #Iz niza za posamezen oglas prebere ustrezne podatke ustrezne podatke.
+    #Iz niza za posamezen oglas prebere ustrezne podatke.
     najdeno = re.search(vzorec_za_podatke, block)
     if najdeno:
         return najdeno.groupdict()
@@ -72,6 +72,7 @@ def ads_from_file(directory, filename):
     return seznam_slovarjev
 
 def write_csv(polja, vrstice, directory, filename):
+    #Ustvari csv datoteko z danimi polji in vrsticami.
     os.makedirs(directory, exist_ok=True)
     pot = os.path.join(directory, filename)
 
@@ -83,6 +84,7 @@ def write_csv(polja, vrstice, directory, filename):
     return
 
 def zberi_oglase():
+    #Prebere podatke iz datotek in vrne seznam slovarjev za posamezen oglas.
     oglasi = []
     for regija in REGIJE:
         for stran in range(1, STEVILA_STRANI_ZA_REGIJE[regija] + 1):
@@ -97,6 +99,7 @@ def zberi_oglase():
     return oglasi
 
 def izloci_podatke(oglas):
+    #Za posamezen oglas nastavi primerne vrednosti parametrov (ustrezen tip (string/int/...) oziroma manjkajoce vrednosti).
     if oglas:
         oglas['id'] = oglas['id']
         oglas['naslov'] = str(oglas['naslov'].strip())
@@ -131,6 +134,7 @@ def izloci_podatke(oglas):
     return oglas
 
 def regije_csv():
+    #Ustvari csv datoteko ki povezuje imena regij z njihovim indeksom.
     regije = [{'indeks': indeks, 'regija': regija} for regija, indeks in REGIJE.items()]
     write_csv(['indeks', 'regija'], regije, nepremicnine_directory, csv_regije)
     return regije

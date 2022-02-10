@@ -13,6 +13,7 @@ def nalozi_stran(url):
     return odziv.text
 
 def stevila_strani():
+    #S spletne strani prebere podatke o stevilu strani oglasov za posamezno regijo in jih shrani v slovar STEVILA_STRANI_ZA_REGIJE.
     for regija in REGIJE:
         url = f'https://www.nepremicnine.net/oglasi-prodaja/{regija}/stanovanje/'
         vsebina = nalozi_stran(url)
@@ -23,6 +24,7 @@ def stevila_strani():
 
 
 def poberi_strani():
+    #Podatke prebere s spletne strani in jih shrani v datoteke.
     stevila_strani()
     for regija in REGIJE:
         for stran in range(1, STEVILA_STRANI_ZA_REGIJE[regija] + 1):
